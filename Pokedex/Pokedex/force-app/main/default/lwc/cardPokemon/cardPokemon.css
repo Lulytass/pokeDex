@@ -1,0 +1,18 @@
+:host{                               /* estilos del contenedor que contiene todo */
+    width: 250px;
+    display: block;
+    --sds-c-card-color-background:  #CFE6D0;
+}
+.contImage{
+    background-color: aqua;
+}
+.card{
+    border-radius: 65px;
+}
+.text{
+    font-weight: bold;
+    color:  #44536B;
+}
+img:hover{
+    cursor: pointer;
+}

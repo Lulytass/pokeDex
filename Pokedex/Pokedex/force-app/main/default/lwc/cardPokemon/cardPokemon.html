@@ -1,0 +1,16 @@
+<template>
+    <lightning-card title={poke.Name}>
+        <div class="slds-align_absolute-center contImage">
+            <img src={poke.Imagen__c} 
+                alt="Imagen de pokemon"
+                class="slds-var-m-around_medium"
+                onclick={navigateToPokemon}
+                name={poke.Id}
+            /> 
+        </div>
+        <div>
+            <p class="slds-p-horizontal_small slds-align_absolute-center text">Tipos: {poke.Tipos__c}</p>
+            <p class="slds-p-horizontal_small slds-align_absolute-center text">Generación: {poke.Generacion__c}</p>
+        </div> 
+    </lightning-card>
+</template>

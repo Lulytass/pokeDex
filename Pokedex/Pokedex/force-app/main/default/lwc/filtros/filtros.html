@@ -1,0 +1,82 @@
+<template>
+    <!-- comienza acordeon con filtros -->
+    <template if:true={pokeData}> 
+        <div class="slds-align_absolute-center"> 
+            <lightning-accordion class="example-accordion">
+                <lightning-accordion-section name="A" label="FILTRADO POR NOMBRE">
+                    <div class="slds-p-around_medium lgc-bg">
+                    <lightning-input 
+                        type="name"
+                        variant="standard"
+                        name="name"
+                        value={value}
+                        placeholder="Introduzca el Nombre del Pokemon..."
+                        onkeyup={handleKeyUp}>
+                    </lightning-input>
+                    </div>        
+                </lightning-accordion-section>
+                <lightning-accordion-section name="B" label="FILTRADO POR GENERACIÓN">
+                    <div class="slds-p-around_medium lgc-bg">
+                        <lightning-combobox 
+                            name="generacion"
+                            value={value}
+                            placeholder="Seleccione una Generación"
+                            options={comboBoxGen}
+                            onchange={handleGeneracionChange} >
+                        </lightning-combobox> 
+                    </div>
+                </lightning-accordion-section>
+                <lightning-accordion-section name="C" label="FILTRADO POR TIPOS">
+                    <div class="slds-p-around_medium lgc-bg">
+                        <lightning-dual-listbox
+                            name="tipo"
+                            max="2"
+                            options={TiposPickList}
+                            onchange={handleTipoChange}>
+                        </lightning-dual-listbox>
+                    </div>
+                </lightning-accordion-section>
+            </lightning-accordion>
+        </div>  
+    </template>
+    <!-- termina acordeon con filtros -->
+
+    <!-- comienza contador -->
+    <template if:true={cantidad}> 
+        <div >              
+            <c-contador cant={cantidad} class="slds-var-m-around_small"></c-contador> 
+        </div>
+    </template>
+    <template if:true={cantText}>
+        <div class="contenedor">
+            <p class="text">{cantText}</p>
+        </div>
+    </template>
+    <!-- termina contador -->
+
+    <!-- comienza card -->
+    <div class="slds-align_absolute-center">
+        <div class="slds-grid slds-wrap slds-grid_align-center grid">
+            <template if:true={visiblepokes}>
+                <template for:each={visiblepokes} for:item="pokemon" >
+                    <div key={pokemon.Id}>
+                        <c-card-pokemon poke={pokemon} class="slds-col slds-var-m-around_small"></c-card-pokemon>
+                    </div>  
+                </template>
+                
+            </template>
+        </div>
+    </div>
+    <!-- termina card -->
+
+    <!-- empieza paginación -->
+    <template if:true={pokeData}>
+        <div slot="footer" class="slds-var-m-vertical_medium">
+            <c-paginacion records={pokeData} onupdate={updatePokeHandler}></c-paginacion>
+        </div>
+    </template>
+    <!-- termina paginación -->
+    <template if:true={error}>
+        <p >Los datos no pudieron ser recuperados</p>
+    </template>
+</template>
