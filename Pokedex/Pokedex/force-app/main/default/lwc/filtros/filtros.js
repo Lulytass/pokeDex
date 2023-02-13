@@ -102,22 +102,7 @@ export default class Filtros extends LightningElement {
             console.log(error);
         }
     }
-    //llamamos a nuestra funcion apex con el decorador wire y guardamos lo que retorna en una variable
-    //pasamos nuestras variables como parametros
-
-    //cuando retorna cero no actualiza, tengo que usar object.keys()
-
-    /*@wire(contador, {
-        tiposFilt: "$tiposFilt",
-        generacionFilt: "$generacionFilt",
-        nameFilt: "$nameFilt"
-    })wiredContador({data,error}){            
-        if (data) {
-            this.cantidad = data; 
-        } else if (error) {
-            console.log(error);
-        }
-    }*/
+    
 
     //actualizamos la lista con los pokemos que se muestran
     updatePokeHandler(event){
