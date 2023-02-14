@@ -17,10 +17,11 @@ public class CallPokeApiBatchMovesTest {
         Movimiento__c query = [select Name, Tipo__c, power__c, Prioridad__c, Efecto__c from Movimiento__c];
         String nombre = (String) query.Name;
         String efecto = (String) query.Efecto__c;
-        // Verify mock response is not null
+        // verificamos que lo obtenido de la respuesta sea correcto
+        // 
         System.assertEquals(1, [select count() from Movimiento__c]);
         System.assertEquals('Pound',nombre);
-        System.assertNotEquals('pound',nombre, 'Los nombres no coinciden, el nombre');
+        System.assertNotEquals('pound',nombre, 'Los nombres no coinciden, el nombre es:: '+nombre);
         System.assertEquals('Inflicts regular damage with no additional effect.',efecto);
         
     }

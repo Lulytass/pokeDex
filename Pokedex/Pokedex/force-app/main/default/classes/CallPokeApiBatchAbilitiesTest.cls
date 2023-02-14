@@ -16,11 +16,9 @@ public with sharing class CallPokeApiBatchAbilitiesTest {
         // Verify mock response is not null
         System.assertEquals(1, [select count() from Habilidad__c],'sucessful');
         Habilidad__c query = [select Name, Efecto__c from Habilidad__c];
-        String nombre = (String) query.Name;
-        String efecto = (String) query.Efecto__c;
         
-        System.assertEquals('Stench',nombre);
-        System.assertEquals('Has a 10% chance of making target Pok�mon flinch with each hit.',efecto);
+        System.assertEquals('Stench',query.Name);
+        System.assertEquals('Has a 10% chance of making target Pok�mon flinch with each hit.',query.Efecto__c);
         
     }
          @isTest
@@ -36,6 +34,6 @@ public with sharing class CallPokeApiBatchAbilitiesTest {
         Test.stopTest();
     	
         // Verify mock response is not null
-        System.assertEquals(0, [select count() from Habilidad__c],'No se creo el registro');
+        System.assertEquals(0, [select count() from Habilidad__c],'No se pudo establecer la conexión para crear el registro');
     }
 }

@@ -2,7 +2,7 @@
 public class CallPokeApiBatch implements Database.Batchable<Integer>, Database.AllowsCallouts{
     
     //creamos y agregamos en una lista los numeros que usaremos para las llamadas a la API
-    public List<Integer> start(Database.BatchableContext bt){
+    public List<Integer> start(Database.BatchableContext bc){
         
         List<Integer> pokemon = new List<Integer>();
         for(integer i=1; i<=898;i++){		//898
@@ -11,12 +11,12 @@ public class CallPokeApiBatch implements Database.Batchable<Integer>, Database.A
         return pokemon;
     }
     
-    Integer j = 0;
+    
     public void execute(Database.BatchableContext bc, List<Integer> scope){
         //llamado a la Api
         Http http = new Http();
         HttpRequest request = new HttpRequest();
-        request.setEndpoint('https://pokeapi.co/api/v2/pokemon/'+scope[j]);
+        request.setEndpoint('https://pokeapi.co/api/v2/pokemon/'+scope[0]);
         request.setMethod('GET');
         request.setHeader('Content-Type', 'application/json;charset=UTF-8');
         request.setHeader('Accept', 'application/json');
@@ -69,7 +69,7 @@ public class CallPokeApiBatch implements Database.Batchable<Integer>, Database.A
             List <Object> statsList = (List<Object>) pokemonesMap.get('stats');
             List <Object> statList = new List<Object>();
             Integer speed, hp, defense, attack;
-			
+            integer indice=0;
             //evaluamos que la lista no este vacia y accedemos a los stat
             if(!statsList.isEmpty()){
                 for(Object st : statsList){
@@ -77,28 +77,29 @@ public class CallPokeApiBatch implements Database.Batchable<Integer>, Database.A
                     statList.add(pokemonStatsMap.get('stat')); 
                 }
             }
-            
             //evaluamos que la lista no este vacia y hacemos una validacion accediendo al nombre del stat y de asignamos el valor de
             //base_stat a la variable que asignaremos al campo del registro
-             
+             	
             if(!statList.isEmpty()){
                 for(Object s : statList){
                     pokeStatMap = (Map <String, Object>) s;
                     
                     if(pokeStatMap.get('name') == 'hp'){
-                        hp = (Integer) pokemonStatsMap.get('base_stat');
+                        hp = pokeApi.stats[indice].base_stat;			//(Integer) pokemonStatsMap.get('base_stat');
                     }
                     else if(pokeStatMap.get('name') == 'attack'){
-                       attack = (Integer) pokemonStatsMap.get('base_stat');
+                       attack = pokeApi.stats[indice].base_stat;			//(Integer) pokemonStatsMap.get('base_stat');
                     }
                     else if(pokeStatMap.get('name') == 'speed'){
-                       speed = (Integer) pokemonStatsMap.get('base_stat');
+                       speed = pokeApi.stats[indice].base_stat;			//(Integer) pokemonStatsMap.get('base_stat');
                     }
                     else if(pokeStatMap.get('name') == 'defense'){
-                       defense = (Integer) pokemonStatsMap.get('base_stat');
+                       defense = pokeApi.stats[indice].base_stat;			//(Integer) pokemonStatsMap.get('base_stat');
                     }
+                    indice++;
                 }
             }
+
             
              //mapas y listas para acceder a los movimientos
            
@@ -123,8 +124,8 @@ public class CallPokeApiBatch implements Database.Batchable<Integer>, Database.A
             List <String> strMov= new List <String>();
             
             if(!moveList.isEmpty()){
-                for(Object t : moveList){
-                    pokeMoveMap = (Map <String, Object>) t;
+                for(Object m : moveList){
+                    pokeMoveMap = (Map <String, Object>) m;
                     moveString = (String) pokeMoveMap.get('name');
                     strMov.add(moveString.capitalize()); 
                 }
@@ -135,7 +136,7 @@ public class CallPokeApiBatch implements Database.Batchable<Integer>, Database.A
             
             Id idSlot4 , idSlot1 , idSlot2 , idSlot3;
              LIST<sObject> listmov = new LIST<sObject>(4);
-             listmov = [SELECT Id, Name from Movimiento__c WHERE Name in :strMov LIMIT 4];
+             listmov = [SELECT Name from Movimiento__c WHERE Name in :strMov LIMIT 4];
             
             //validaciones de tamaño para asignar los valores de la lista a las variables Id
             if(listmov.size() == 1){
@@ -187,7 +188,7 @@ public class CallPokeApiBatch implements Database.Batchable<Integer>, Database.A
             //asigno el valor del id del registro retornado a mi variable id
             sObject abilityObj;
             Id idAbility;
-            if(!strAb.isEmpty()){	//.size() > 0
+            if(!strAb.isEmpty()){	
                 abilityObj = [SELECT Id, Name from Habilidad__c WHERE Name like :strAb[0] LIMIT 1];
                 idAbility = abilityObj.id;
             }
@@ -203,10 +204,10 @@ public class CallPokeApiBatch implements Database.Batchable<Integer>, Database.A
             	Altura__c = altura + ' mts.',
             	Peso__c = peso + ' kg.',
             	Imagen__c = pokeApi.sprites.front_default,
-            	Vida__c = pokeApi.stats[0].base_stat,			//hp,		
-            	Velocidad__c = pokeApi.stats[5].base_stat,		//speed,
-            	Defensa__c = pokeApi.stats[2].base_stat,		//defense,
-            	Ataque__c = pokeApi.stats[1].base_stat,			//attack,
+            	Vida__c = hp,			//	pokeApi.stats[0].base_stat,	
+            	Velocidad__c = speed,		//pokeApi.stats[5].base_stat,
+            	Defensa__c = defense,		//pokeApi.stats[2].base_stat,
+            	Ataque__c = attack, 		//pokeApi.stats[1].base_stat,
             	Tipos__c = typesString,           	
                 Slot1__c = idSlot1,
             	Slot2__c = idSlot2,
@@ -218,10 +219,9 @@ public class CallPokeApiBatch implements Database.Batchable<Integer>, Database.A
             // insertamos el registro creado
             	insert pokemon;         
         	} catch(Exception e) {
-            	System.debug(e);
+            	System.debug('Codigo de error::' + e);
         	}
-            // incremento de variable que uso como indice para recorrer la lista de integers generada en start
-        	j++;
+            
         } 
         // en caso de recibir un status distinto de 200 realizamos el debug
         else{

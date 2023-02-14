@@ -8,12 +8,12 @@ public class CallPokeApiBatchAbilities implements Database.Batchable<Integer>, D
         return ind;
     }
     
-    Integer j = 0;
+  	
     public void execute(Database.BatchableContext bc, List<Integer> scope){
         //llamado a la Api
         Http http = new Http();
         HttpRequest request = new HttpRequest();
-        request.setEndpoint('https://pokeapi.co/api/v2/ability/'+scope[j]);
+        request.setEndpoint('https://pokeapi.co/api/v2/ability/'+scope[0]);
         request.setMethod('GET');
         request.setHeader('Content-Type', 'application/json;charset=UTF-8');
         request.setHeader('Accept', 'application/json');
@@ -33,7 +33,6 @@ public class CallPokeApiBatchAbilities implements Database.Batchable<Integer>, D
             List <Object> efectosList = (List<Object>) pokemonesMap.get('effect_entries');
             List <Object> efectoList = new List<Object>();
             String efectoString = '';
-            String efectosString = '';
             
             //evaluamos que la lista no este vacia y accedemos a los move
             if(!efectosList.isEmpty()){
@@ -42,22 +41,26 @@ public class CallPokeApiBatchAbilities implements Database.Batchable<Integer>, D
                     efectoList.add(pokemonefectosMap.get('language'));      
                 }
             }
-            //evaluamos que la lista no este vacia y tenga move para poder acceder a name y poner la
-             
+            //evaluamos que la lista no este vacia y tenga move para poder acceder a name 
+            integer indice=0;
+            
             if(!efectoList.isEmpty()){
-                for(Object t : efectoList){
-                    pokeefectoMap = (Map <String, Object>) t;
+                for(Object e : efectoList){
+                    pokeefectoMap = (Map <String, Object>) e;
                     if(pokeefectoMap.get('name') == 'en'){
-                        efectoString = (String) pokemonefectosMap.get('short_effect');
+                        
+                        efectoString = (String) pokeApiAb.effect_entries[indice].short_effect;
                     
                     }
-                    
+                   indice++; 
                 }
             }
             
+            String nameAbility =(String) pokemonesMap.get('name');
+            
             Habilidad__c movimiento = new Habilidad__c(
-            	ExtId__c = pokeApiAb.id,
-            	Name = pokeApiAb.name.capitalize(),
+            	ExtId__c = (integer) pokemonesMap.get('id'),		//pokeApiAb.id,
+            	Name = nameAbility.capitalize(),					//pokeApiAb.name.capitalize(),
                 Efecto__c = efectoString
         	);
         	try {
@@ -66,7 +69,6 @@ public class CallPokeApiBatchAbilities implements Database.Batchable<Integer>, D
         	} catch(Exception e) {
             	System.debug('Error al insertar registro:: ' + e);
         	}
-        	j++;
         } 
         else{
              	System.debug('Codigo de error al conectar a la api::'+ response.getStatusCode());

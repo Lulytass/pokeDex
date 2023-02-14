@@ -8,12 +8,11 @@ public class CallPokeApiBatchMoves implements Database.Batchable<Integer>, Datab
         return ind;
     }
     
-    Integer j = 0;
     public void execute(Database.BatchableContext bc, List<Integer> scope){
         //llamado a la Api
         Http http = new Http();
         HttpRequest request = new HttpRequest();
-        request.setEndpoint('https://pokeapi.co/api/v2/move/'+scope[j]);
+        request.setEndpoint('https://pokeapi.co/api/v2/move/'+scope[0]);
         request.setMethod('GET');
         request.setHeader('Content-Type', 'application/json;charset=UTF-8');
         request.setHeader('Accept', 'application/json');
@@ -23,50 +22,49 @@ public class CallPokeApiBatchMoves implements Database.Batchable<Integer>, Datab
         if (response.getStatusCode() == 200) {
             
             //usamos parse con clase apex para acceder a los datos simples y deserializeUntype para las listas
-            MovesPokeApiJson pokeApiMov = MovesPokeApiJson.parse(response.getBody());
+            //MovesPokeApiJson pokeApiMov = MovesPokeApiJson.parse(response.getBody());
             
             Map <String, Object> pokemonesMap = (Map <String, Object>) JSON.deserializeUntyped(response.getBody());
             
             //mapas, listas y strings para acceder al efecto
-            Map <String, Object> pokemonefectosMap = new Map <String, Object>();
+            List <Object> pokeefectoList = (List<Object>) pokemonesMap.get('effect_entries');
             Map <String, Object> pokeefectoMap = new Map <String, Object>();
-            List <Object> efectosList = (List<Object>) pokemonesMap.get('effect_entries');
             List <Object> efectoList = new List<Object>();
             String efectoString = '';
-            String efectosString = '';
+            //Map <String, Object> pokeefectoMap =(Map<String, Object>) pokemonesMap.get('effect_entries');
             
-            //evaluamos que la lista no este vacia y accedemos a los move
-            if(!efectosList.isEmpty()){
-                for(Object efecto : efectosList){
-                    pokemonefectosMap = (Map<String, Object>) efecto;
-                    efectoList.add(pokemonefectosMap.get('language'));      
+            if(!pokeefectoList.isEmpty()){
+                for(Object efecto : pokeefectoList){
+                    pokeefectoMap = (Map<String, Object>) efecto;
+                    efectoList.add(pokeefectoMap.get('short_effect'));      
                 }
-            }
-            //evaluamos que la lista no este vacia y tenga move para poder acceder a name y poner la
-             
-            if(!efectoList.isEmpty()){
-                for(Object t : efectoList){
-                    pokeefectoMap = (Map <String, Object>) t;
-                    if(pokeefectoMap.get('name') == 'en'){
-                        efectoString = (String) pokemonefectosMap.get('short_effect');
-                    
-                    }
-                    
-                }
+                efectoString = (String) efectoList[0];
             }
             
+
+
+            
+            String nameMov =(String) pokemonesMap.get('name');
+            
+            //type name
+            Map<String, Object> type =(Map<String, Object>) pokemonesMap.get('type');
+            string nameType =(String) type.get('name');
+            
+            //target name
+            Map<String, Object> target =(Map<String, Object>) pokemonesMap.get('target');
+            string nameTarget =(String) target.get('name');
             
             Movimiento__c movimiento = new Movimiento__c(
-            	ExtId__c = pokeApiMov.id,
-            	Name = pokeApiMov.name.capitalize(),
-                Chance_de_Efecto__c = pokeApiMov.effect_chance,
+            	ExtId__c = (integer) pokemonesMap.get('id'),							//pokeApiMov.id,
+            	Name = nameMov.capitalize(),											//pokeApiMov.name.capitalize(),
+                Chance_de_Efecto__c = (integer) pokemonesMap.get('effect_chance'),		//pokeApiMov.effect_chance,
                 Efecto__c = efectoString,
-                power__c = pokeApiMov.power,
-                Pp__c = pokeApiMov.pp,
-                Prioridad__c = pokeApiMov.priority,
-                Punteria__c = pokeApiMov.accuracy,
-                Tipo__c = pokeApiMov.type.name,
-                Objetivo__c = pokeApiMov.target.name    
+                power__c = (integer) pokemonesMap.get('power'),							//pokeApiMov.power,
+                Pp__c = (integer) pokemonesMap.get('pp'),								//pokeApiMov.pp,
+                Prioridad__c = (integer) pokemonesMap.get('priority'),					//pokeApiMov.priority,
+                Punteria__c = (integer) pokemonesMap.get('accuracy'),					//pokeApiMov.accuracy,
+                Tipo__c = nameType,														//pokeApiMov.type.name,
+                Objetivo__c = nameTarget												//pokeApiMov.target.name    
         	);
         	try {
             // insertamos el registro creado
@@ -74,7 +72,6 @@ public class CallPokeApiBatchMoves implements Database.Batchable<Integer>, Datab
         	} catch(Exception e) {
             	System.debug('Error al insertar registro:: ' + e);
         	}
-        	j++;
         } 
         else{
              	System.debug('Codigo de error al conectar a la api::'+ response.getStatusCode());
